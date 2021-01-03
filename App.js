@@ -1,18 +1,22 @@
 import { StatusBar } from 'expo-status-bar';
 import React,{useEffect, useState} from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 
 import * as Location from 'expo-location';
 import WeatherInfo from './components/WeatherInfo';
 import UnitsPicker from './components/UnitsPicker';
+import { colors } from './utils';
+import ReloadIcon from './components/ReloadIcon';
+import WeatherDetails from './components/WeatherDetails';
+import {WEATHER_API_KEY} from '@env'
 
-const WEATHER_API_KEY = 'edee621a4ee4a6256e577af64c264b62'
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather?'
 
 export default function App() {
   const [errMsg,setErrMsg] = useState(null)
   const [currWeather,setCurrWeather] = useState(null)
   const [unitSystem,setUnitSystem] = useState('metric')
+  const {PRIMARY_COLOR} = colors
 
   useEffect(() => {
     load()
@@ -20,6 +24,7 @@ export default function App() {
 
   const load = async() =>{
     setCurrWeather(null)
+    setErrMsg(null)
     try{
       let {status} = await Location.requestPermissionsAsync()
 
@@ -55,19 +60,30 @@ export default function App() {
     return (
       <View style={styles.container}>
         <StatusBar style="auto" />
-
+        
         <View style={styles.main}>
           <UnitsPicker unitSystem={unitSystem} setUnitSystem={setUnitSystem} />
+          <ReloadIcon load={load} />
           <WeatherInfo currWeather={currWeather} />
         </View>
 
+        <WeatherDetails currWeather={currWeather} unitSystem={unitSystem} />
+      </View>
+    );
+  }
+  else if(errMsg){
+    return (
+      <View style={styles.container}>
+        <ReloadIcon load={load} />
+        <Text style={{textAlign : 'center'}} >{errMsg}</Text>
+        <StatusBar style="auto" />
       </View>
     );
   }
   else{
-    return (
+    return(
       <View style={styles.container}>
-        <Text>{errMsg}</Text>
+        <ActivityIndicator color={PRIMARY_COLOR} size="large" />
         <StatusBar style="auto" />
       </View>
     );
