@@ -3,9 +3,11 @@ import React,{useEffect, useState} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import * as Location from 'expo-location';
+import WeatherInfo from './components/WeatherInfo';
+import UnitsPicker from './components/UnitsPicker';
 
 const WEATHER_API_KEY = 'edee621a4ee4a6256e577af64c264b62'
-const BASE_URL = 'http://api.openweathermap.org/data/2.5/weather?'
+const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather?'
 
 export default function App() {
   const [errMsg,setErrMsg] = useState(null)
@@ -14,9 +16,10 @@ export default function App() {
 
   useEffect(() => {
     load()
-  }, [])
+  }, [unitSystem])
 
   const load = async() =>{
+    setCurrWeather(null)
     try{
       let {status} = await Location.requestPermissionsAsync()
 
@@ -49,15 +52,15 @@ export default function App() {
   }
 
   if(currWeather){
-    const {main:{temp}} = currWeather
     return (
       <View style={styles.container}>
         <StatusBar style="auto" />
 
         <View style={styles.main}>
-          <Text>{temp}</Text>
+          <UnitsPicker unitSystem={unitSystem} setUnitSystem={setUnitSystem} />
+          <WeatherInfo currWeather={currWeather} />
         </View>
-        
+
       </View>
     );
   }
